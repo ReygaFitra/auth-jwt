@@ -1,4 +1,4 @@
-package Utils
+package authUtils
 
 import (
 	"log"

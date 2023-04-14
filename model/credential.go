@@ -1,4 +1,4 @@
-package model
+package authModel
 
 type Credential struct {
 	Username string `json:"username"`
