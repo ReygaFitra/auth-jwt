@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	authModel "github.com/ReygaFitra/auth-jwt/model"
 	authUtils "github.com/ReygaFitra/auth-jwt/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -11,8 +12,6 @@ import (
 
 
 func Login(ctx *gin.Context) {
-	secretKey := authUtils.DotEnv("SECRET_KEY")
-	var jwtKey = []byte(secretKey)
 	
 	var user authModel.Credential
 
@@ -22,13 +21,13 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	if user.Username == secretKey {
+	if user.Username == authModel.SecretKey {
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
 		claims["username"] = user.Username
 		claims["exp"] = time.Now().Add(time.Minute * 3).Unix()
 
-		tokenString, err :=token.SignedString(jwtKey)
+		tokenString, err :=token.SignedString(authModel.JwtKey)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed generate token!"})
 			return
