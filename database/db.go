@@ -6,6 +6,8 @@ import (
 	"log"
 
 	authController "github.com/ReygaFitra/auth-jwt/controller"
+	authRepository "github.com/ReygaFitra/auth-jwt/repository"
+	authUsecase "github.com/ReygaFitra/auth-jwt/usecase"
 	authUtils "github.com/ReygaFitra/auth-jwt/utils"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -31,8 +33,13 @@ func ConnectDB() {
 
 	router := gin.Default()
 
+
+	authRepo := authRepository.NewAuthRepo(db)
+	authUsecase := authUsecase.NewAuthUsecase(authRepo)
+	authCtrl := authController.NewAuthController(authUsecase)
+
 	// login routes
-	router.POST("/auth/login", authController.Login)
+	router.POST("/auth/login", authCtrl.Login)
 	// register routes
 	// router.POST("/auth/register",register)
 

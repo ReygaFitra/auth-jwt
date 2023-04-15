@@ -5,14 +5,17 @@ import (
 	"time"
 
 	authModel "github.com/ReygaFitra/auth-jwt/model"
+	authUsecase "github.com/ReygaFitra/auth-jwt/usecase"
 	authUtils "github.com/ReygaFitra/auth-jwt/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
+type AuthController struct {
+	authUsecase authUsecase.AuthUsecase
+}
 
-func Login(ctx *gin.Context) {
-	
+func (c *AuthController) Login(ctx *gin.Context) {
 	var user authModel.Credential
 
 	err := ctx.ShouldBindJSON(&user)
@@ -20,6 +23,8 @@ func Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 		return
 	}
+
+	res := c.authUsecase.SignIn(&user)
 
 	if user.Username == authModel.SecretKey {
 		token := jwt.New(jwt.SigningMethodHS256)
@@ -32,10 +37,22 @@ func Login(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed generate token!"})
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
+		ctx.JSON(http.StatusOK, gin.H{"token": tokenString, "user": res})
 	} else {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unregistered student!"})
 	}
+}
+
+func (c *AuthController) Register(ctx *gin.Context) {
+	var newUser authModel.Credential
+
+	if err := ctx.BindJSON(&newUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, "Invalid Input")
+		return
+	}
+
+	res := c.authUsecase.SignUp(&newUser)
+	ctx.JSON(http.StatusCreated, res)
 }
 
 func Profile(ctx *gin.Context) {
@@ -77,3 +94,10 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+func NewAuthController(u authUsecase.AuthUsecase) *AuthController {
+	controller := AuthController{
+		authUsecase: u,
+	}
+
+	return &controller
+}
