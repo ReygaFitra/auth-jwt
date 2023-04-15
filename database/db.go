@@ -37,8 +37,8 @@ func ConnectDB() {
 	// router.POST("/auth/register",register)
 
 	// // students routes
-	// studentRouter := router.Group("/api/v1/students/")
-	// studentRouter.Use(authController.AuthMiddleware())
+	studentRouter := router.Group("/api/v1/students/")
+	studentRouter.Use(authController.AuthMiddleware())
 
 	// studentRouter.GET("", getall)
 	// studentRouter.GET("/:id", getbyid)
