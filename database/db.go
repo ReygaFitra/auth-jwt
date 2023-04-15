@@ -1,4 +1,4 @@
-package database
+package authDatabase
 
 import (
 	"database/sql"
