@@ -1,4 +1,4 @@
-package repository
+package authRepository
 
 import (
 	"database/sql"
@@ -40,7 +40,7 @@ func (r *authRepo) Login(student *authModel.Credential) string {
 	return "created successfully"
 }
 
-func NewStudentRepo(db *sql.DB) AuthRepo {
+func NewAuthRepo(db *sql.DB) AuthRepo {
 	repo := new(authRepo)
 	repo.db = db
 
