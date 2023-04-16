@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 
+	authDatabase "github.com/ReygaFitra/auth-jwt/database"
 	authModel "github.com/ReygaFitra/auth-jwt/model"
 )
 
@@ -17,6 +18,9 @@ type authRepo struct {
 }
 
 func (r *authRepo) Register(newStudent *authModel.Credential) string {
+	db, _ := authDatabase.ConnectDB()
+	defer db.Close()
+
 	query := "INSERT INTO credentials (user_name, password) VALUES ($1, $2)"
 	_, err := r.db.Exec(query, newStudent.Username, newStudent.Password)
 
@@ -29,6 +33,9 @@ func (r *authRepo) Register(newStudent *authModel.Credential) string {
 }
 
 func (r *authRepo) Login(student *authModel.Credential) string {
+	db, _ := authDatabase.ConnectDB()
+	defer db.Close()
+
 	query := "INSERT INTO credentials (user_name, password) VALUES ($1, $2)"
 	_, err := r.db.Exec(query, student.Username, student.Password)
 
