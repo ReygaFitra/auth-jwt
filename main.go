@@ -1,5 +1,5 @@
 package main
 
 func main() {
-	// authDatabase.ConnectDB()
+	// authDelivery.Router()
 }
