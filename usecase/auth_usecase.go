@@ -19,7 +19,7 @@ func (u *authUsecase) SignUp(newStudent *authModel.Credential) string {
 }
 
 func (u *authUsecase) SignIn(student *authModel.Credential) string {
-	return u.authRepo.Login(student)
+	return u.authRepo.Login()
 }
 
 func NewAuthUsecase(authRepo authRepository.AuthRepo) AuthUsecase {
