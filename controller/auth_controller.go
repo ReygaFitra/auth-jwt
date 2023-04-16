@@ -24,9 +24,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	res := c.authUsecase.SignIn(&user)
-
-	if user.Username == authModel.SecretKey {
+	if user.Username == "secretkey" && user.Password == "password" {
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
 		claims["username"] = user.Username
@@ -37,10 +35,17 @@ func (c *AuthController) Login(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed generate token!"})
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{"token": tokenString, "user": res})
+		ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
 	} else {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unregistered student!"})
 	}
+
+	if err := ctx.BindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, "Invalid Input")
+		return
+	}
+	res := c.authUsecase.SignIn(&user)
+	ctx.JSON(http.StatusCreated, res)
 }
 
 func (c *AuthController) Register(ctx *gin.Context) {
