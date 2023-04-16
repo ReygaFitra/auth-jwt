@@ -67,6 +67,32 @@ func LoginHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
+func RegisterHandler(ctx *gin.Context) {
+	var user model.Student
+
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		ctx.Abort()
+		return
+	}
+
+	db,err := authDatabase.ConnectDB()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	query := "INSERT INTO student (name, age, major, student_user_name) VALUES ($1, &2, &3, &4)"
+	_, err = db.Exec(query, user.Name, user.Age, user.Major, user.StudentUserName)
+
+	if err != nil {
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, &user)
+}
+
 func MiddlewareHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
@@ -101,11 +127,9 @@ func ProfileHandler(ctx *gin.Context) {
 	}
 	defer db.Close()
 
-		// ambil username dari JWT token
 		claims := ctx.MustGet("claims").(jwt.MapClaims)
 		username := claims["username"].(string)
-	
-		// dapatkan informasi user dari database (dalam hal ini, kita return username)
+
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Welcome to profile",
 			"username": username,
