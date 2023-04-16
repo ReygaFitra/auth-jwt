@@ -51,6 +51,28 @@ func (c *AuthController) Login(ctx *gin.Context) {
 func (c *AuthController) Register(ctx *gin.Context) {
 	var newUser authModel.Credential
 
+	err := ctx.ShouldBindJSON(&newUser)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
+		return
+	}
+
+	if newUser.Username == "secretkey" && newUser.Password == "password" {
+		token := jwt.New(jwt.SigningMethodHS256)
+		claims := token.Claims.(jwt.MapClaims)
+		claims["username"] = newUser.Username
+		claims["exp"] = time.Now().Add(time.Minute * 3).Unix()
+
+		tokenString, err :=token.SignedString(authModel.JwtKey)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed generate token!"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
+	} else {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unregistered student!"})
+	}
+
 	if err := ctx.BindJSON(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, "Invalid Input")
 		return
@@ -60,7 +82,7 @@ func (c *AuthController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, res)
 }
 
-func Profile(ctx *gin.Context) {
+func (c *AuthController) Profile(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(jwt.MapClaims)
 	username := claims["username"].(string)
 
